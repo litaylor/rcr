@@ -9,6 +9,20 @@
   <body>
 
     <div class="box">
+      <select class="" name="category-select" id="category-select">
+        <option value="job-growth-rate-val">Job Growth Rate</option>
+        <option value="average-wage-val">Average Wage</option>
+        <option value="average-wage-service-sector-val">Average Wage, Service Sector</option>
+        <option value="median-net-worth-val">Median Net Worth</option>
+        <option value="business-establishment-start-rate-val">Business Establishment Start Rate</option>
+        <option value="median-hhi-val">Median HHI</option>
+        <option value="median-hhi-lowest-quintile-val">Median HHI - Lowest Quintile</option>
+        <option value="advanced-industry-jobs-share-of-all-jobs-val">Advanced Industry Job Rate</option>
+        <option value="merchandise-exports-growth-rate-val">Merchandise Exports Growth Rate</option>
+        <option value="growth-rate-of-existing-home-sales-price-val">Growth Rate of Existing Home Sales Price</option>
+        <option value="growth-rate-of-existing-home-sales-price-val">Growth Rate of Existing Home Sales Price</option>
+
+      </select>
       <div class="card list list-01">
 
       </div>
@@ -17,48 +31,70 @@
 
     <script type="text/javascript">
       $(document).ready(function() {
-        console.log('ready');
+
         d3.json('data/01-economic-vitality.json', function(data) {
 
-          var sortBy = 'average-wage-service-sector-val';
-          var sortDirection = 'descending';
-          var valExpression = 'whole';
-          var f;
+          $('#category-select').change(function() {
 
-          if (valExpression == 'percent') {
-            f = d3.format(".2%");
-          }
-          else if (valExpression == 'whole') {
-            f = d3.format(",");
-          }
+            $('.list').html('');
 
+            var sortBy = $('#category-select').val();
+            var valExpression = 'whole';
 
-
-          data.sort(
-            function(a,b) {
-              return d3[sortDirection](a[sortBy], b[sortBy])
+            if (sortBy.indexOf('rate') >= 0) {
+              valExpression = 'percent'
             }
-          );
 
-          var list = d3.select(".list");
-          list.selectAll("div")
+            var sortDirection = 'descending';
+            var f;
+
+            if (valExpression == 'percent') {
+              f = d3.format(".2%");
+            }
+            else if (valExpression == 'whole') {
+              f = d3.format(",");
+            }
+
+
+
+            data.sort(
+              function(a,b) {
+                return d3[sortDirection](a[sortBy], b[sortBy])
+              }
+            );
+
+            var list = d3.select(".list");
+            list.selectAll("div")
             .data(data)
             .enter().append("div")
-              .attr("class", function(d) {
-                if (d.region=="Tampa Bay") {
-                  return "tampa-bay";
-                }
+            .attr("class", function(d) {
+              if (d.region=="Tampa Bay") {
+                return "tampa-bay entry";
+              }
+              else {
+                return "entry"
+              }
+            })
+            .html(function(d, i) {
+              if (d[sortBy]) {
+                var rank = i + 1;
+                var string = "<span class='rankLabel'>" + rank + "</span> " +
+                "<span class='regionLabel'>" + d.region + "</span>" +
+                "<span class='value'>" + f(d[sortBy]) +"</span>"
+                return string;
+              }
+            });
+
+            list.selectAll(".entry")
+              .append("div")
+              .attr("class","bar")
+              .style(function(d) {
+                "width" , d
               })
-              .html(function(d, i) {
-                if (d[sortBy]) {
-                  var rank = i + 1;
-                  var string = "<span class='rankLabel'>" + rank + "</span> " +
-                  "<span class='regionLabel'>" + d.region + "</span>" +
-                  "<span class='value'>" + f(d[sortBy]) +"</span>"
-                  return string;
-                }
-              })
-        })
+
+          });
+
+        });
       });
     </script>
 
@@ -72,6 +108,9 @@
       }
       .tampa-bay {
         background-color: rgba(255,255,0,0.1);
+      }
+      .bar {
+        background-color: blue;
       }
     </style>
 
