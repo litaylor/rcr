@@ -1,52 +1,92 @@
 <!DOCTYPE html>
 <html>
   <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <title></title>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-scale/1.0.6/d3-scale.min.js"></script>
   </head>
   <body>
-
+    <div class="screenCheck"></div>
     <div class="box">
-      <select class="" name="category-select" id="category-select">
-        <option value="job-growth-rate-val">Job Growth Rate</option>
-        <option value="average-wage-val">Average Wage</option>
-        <option value="average-wage-service-sector-val">Average Wage, Service Sector</option>
-        <option value="median-net-worth-val">Median Net Worth</option>
-        <option value="business-establishment-start-rate-val">Business Establishment Start Rate</option>
-        <option value="median-hhi-val">Median HHI</option>
-        <option value="median-hhi-lowest-quintile-val">Median HHI - Lowest Quintile</option>
-        <option value="advanced-industry-jobs-share-of-all-jobs-val">Advanced Industry Job Rate</option>
-        <option value="merchandise-exports-growth-rate-val">Merchandise Exports Growth Rate</option>
-        <option value="growth-rate-of-existing-home-sales-price-val">Growth Rate of Existing Home Sales Price</option>
-        <option value="growth-rate-of-existing-home-sales-price-val">Growth Rate of Existing Home Sales Price</option>
 
-      </select>
-      <div class="card list list-01">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi pretium, leo at tempor vulputate, diam ligula lacinia magna, in iaculis augue eros interdum lectus. Praesent finibus massa orci.
+      </p>
+      <div class="card">
+        <h2> Good news </h2>
+        <h4> Job growth rate </h4>
+        <div class="list list-01">
 
+        </div>
       </div>
+      <div class="card">
+        <h2> Bad news </h2>
+        <h4> Average wages </h4>
+        <div class="list list-02">
+
+        </div>
+      </div>
+
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi pretium, leo at tempor vulputate, diam ligula lacinia magna, in iaculis augue eros interdum lectus. Praesent finibus massa orci.
+      </p>
+      <div class="card">
+        <h2> Good news </h2>
+        <h4> Hours driving in congestion </h4>
+        <div class="list list-03">
+
+        </div>
+      </div>
+      <div class="card">
+        <h2> Bad news </h2>
+        <h4> Pedestrian fatalaties per 100,000 people </h4>
+        <div class="list list-04">
+
+        </div>
+      </div>
+
+
     </div>
 
 
     <script type="text/javascript">
+
+
       $(document).ready(function() {
 
-        d3.json('data/01-economic-vitality.json', function(data) {
+        d3.json('data/01-economic-vitality.json', function(dataEdu) {
 
-          $('#category-select').change(function() {
+            $('.list-01').html('');
 
-            $('.list').html('');
-
-            var sortBy = $('#category-select').val();
-            var valExpression = 'whole';
-
-            if (sortBy.indexOf('rate') >= 0) {
-              valExpression = 'percent'
-            }
-
+            var sortBy = 'job-growth-rate-val';
+            var valExpression = 'percent';
             var sortDirection = 'descending';
             var f;
+            var min = d3.min(dataEdu, function(d) {
+              return +d[sortBy]
+            });
+
+            var max = d3.max(dataEdu, function(d) {
+              return +d[sortBy]
+            });
+
+            var rangeMin = 5;
+
+            if (min<0) {
+              rangeMin = -50;
+            }
+
+            var rangeMax = 0;
+
+            if (($(".screenCheck")).css('width')=='0px') {
+              rangeMax = 100
+            }
+            else {
+              rangeMax = 50
+            }
+            var xScaler = d3.scaleLinear().domain([min,max]).range([rangeMin,rangeMax]);
+
 
             if (valExpression == 'percent') {
               f = d3.format(".2%");
@@ -57,15 +97,15 @@
 
 
 
-            data.sort(
+            dataEdu.sort(
               function(a,b) {
                 return d3[sortDirection](a[sortBy], b[sortBy])
               }
             );
 
-            var list = d3.select(".list");
+            var list = d3.select(".list-01");
             list.selectAll("div")
-            .data(data)
+            .data(dataEdu)
             .enter().append("div")
             .attr("class", function(d) {
               if (d.region=="Tampa Bay") {
@@ -78,39 +118,321 @@
             .html(function(d, i) {
               if (d[sortBy]) {
                 var rank = i + 1;
-                var string = "<span class='rankLabel'>" + rank + "</span> " +
+                var string = "<div class='entryText'><span class='rankLabel'>" + rank + "</span> " +
                 "<span class='regionLabel'>" + d.region + "</span>" +
-                "<span class='value'>" + f(d[sortBy]) +"</span>"
+                "<span class='value'>" + f(d[sortBy]) +"</span></div>"
                 return string;
               }
-            });
-
-            list.selectAll(".entry")
+            })
               .append("div")
               .attr("class","bar")
-              .style(function(d) {
-                "width" , d
+              .style("width", function(d) {
+                if (d[sortBy]) {
+                  var width = xScaler(d[sortBy]);
+                  width += '%';
+                  return width
+                }
               })
+
+
+
+          $('.list-02').html('');
+
+          var sortBy = 'average-wage-val';
+          var valExpression = 'whole';
+          var sortDirection = 'descending';
+          var f;
+          var min = d3.min(dataEdu, function(d) {
+            return +d[sortBy]
+          });
+
+          var max = d3.max(dataEdu, function(d) {
+            return +d[sortBy]
+          });
+
+          var rangeMin = 5;
+
+          if (min<0) {
+            rangeMin = -50;
+          }
+
+          var rangeMax = 0;
+
+          if (($(".screenCheck")).css('width')=='0px') {
+            rangeMax = 100
+          }
+          else {
+            rangeMax = 50
+          }
+          var xScaler = d3.scaleLinear().domain([min,max]).range([rangeMin,rangeMax]);
+
+          f = d3.format("$,");
+
+          dataEdu.sort(
+            function(a,b) {
+              return d3[sortDirection](a[sortBy], b[sortBy])
+            }
+          );
+
+          list = d3.select(".list-02");
+          list.selectAll("div")
+          .data(dataEdu)
+          .enter().append("div")
+          .attr("class", function(d) {
+            if (d.region=="Tampa Bay") {
+              return "tampa-bay entry";
+            }
+            else {
+              return "entry"
+            }
+          })
+          .html(function(d, i) {
+            if (d[sortBy]) {
+              var rank = i + 1;
+              var string = "<div class='entryText'><span class='rankLabel'>" + rank + "</span> " +
+              "<span class='regionLabel'>" + d.region + "</span>" +
+              "<span class='value'>" + f(d[sortBy]) +"</span></div>"
+              return string;
+            }
+          })
+            .append("div")
+            .attr("class","bar")
+            .style("width", function(d) {
+              if (d[sortBy]) {
+                var width = xScaler(d[sortBy]);
+                width += '%';
+                return width
+              }
+            })
 
           });
 
-        });
+
+          d3.json('data/03-infrastructure.json', function(dataEdu) {
+
+              $('.list-03').html('');
+
+              var sortBy = 'driving-time-spent-in-congestion';
+              var valExpression = 'whole';
+              var sortDirection = 'ascending';
+              var f;
+              var min = d3.min(dataEdu, function(d) {
+                return +d[sortBy]
+              });
+
+              var max = d3.max(dataEdu, function(d) {
+                return +d[sortBy]
+              });
+
+              var rangeMin = 5;
+
+              if (min<0) {
+                rangeMin = -50;
+              }
+
+              var rangeMax = 0;
+
+              if (($(".screenCheck")).css('width')=='0px') {
+                rangeMax = 100
+              }
+              else {
+                rangeMax = 50
+              }
+              var xScaler = d3.scaleLinear().domain([min,max]).range([rangeMin,rangeMax]);
+
+
+              f = d3.format(".2");
+
+
+              dataEdu.sort(
+                function(a,b) {
+                  return d3[sortDirection](a[sortBy], b[sortBy])
+                }
+              );
+
+              list = d3.select(".list-03");
+              list.selectAll("div")
+              .data(dataEdu)
+              .enter().append("div")
+              .attr("class", function(d) {
+                if (d.region=="Tampa Bay") {
+                  return "tampa-bay entry";
+                }
+                else {
+                  return "entry"
+                }
+              })
+              .html(function(d, i) {
+                if (d[sortBy]) {
+                  var rank = i + 1;
+                  var string = "<div class='entryText'><span class='rankLabel'>" + rank + "</span> " +
+                  "<span class='regionLabel'>" + d.region + "</span>" +
+                  "<span class='value'>" + f(d[sortBy]) +"</span></div>"
+                  return string;
+                }
+              })
+                .append("div")
+                .attr("class","bar")
+                .style("width", function(d) {
+                  if (d[sortBy]) {
+                    var width = xScaler(d[sortBy]);
+                    width += '%';
+                    return width
+                  }
+                });
+
+                $('.list-04').html('');
+
+                var sortBy = 'pedestrian-fatalities-per-population';
+                var valExpression = 'whole';
+                var sortDirection = 'ascending';
+                var f;
+                var min = d3.min(dataEdu, function(d) {
+                  return +d[sortBy]
+                });
+
+                var max = d3.max(dataEdu, function(d) {
+                  return +d[sortBy]
+                });
+
+                var rangeMin = 5;
+
+                if (min<0) {
+                  rangeMin = -50;
+                }
+
+                var rangeMax = 0;
+
+                if (($(".screenCheck")).css('width')=='0px') {
+                  rangeMax = 100
+                }
+                else {
+                  rangeMax = 50
+                }
+                var xScaler = d3.scaleLinear().domain([min,max]).range([rangeMin,rangeMax]);
+
+
+                f = d3.format(".2");
+
+
+                dataEdu.sort(
+                  function(a,b) {
+                    return d3[sortDirection](a[sortBy], b[sortBy])
+                  }
+                );
+
+                list = d3.select(".list-04");
+                list.selectAll("div")
+                .data(dataEdu)
+                .enter().append("div")
+                .attr("class", function(d) {
+                  if (d.region=="Tampa Bay") {
+                    return "tampa-bay entry";
+                  }
+                  else {
+                    return "entry"
+                  }
+                })
+                .html(function(d, i) {
+                  if (d[sortBy]) {
+                    var rank = i + 1;
+                    var string = "<div class='entryText'><span class='rankLabel'>" + rank + "</span> " +
+                    "<span class='regionLabel'>" + d.region + "</span>" +
+                    "<span class='value'>" + f(d[sortBy]) +"</span></div>"
+                    return string;
+                  }
+                })
+                  .append("div")
+                  .attr("class","bar")
+                  .style("width", function(d) {
+                    if (d[sortBy]) {
+                      var width = xScaler(d[sortBy]);
+                      width += '%';
+                      return width
+                    }
+                  });
+
+
+
+            });
+
       });
     </script>
 
     <style media="screen">
-      * {
-        border: thin solid #eeeeee;
-        padding: 10px;
+      .screenCheck {
+        display: none;
+        width: 1px;
+      }
+      .value {
+        float: right;
+        /*margin-right:20px;*/
+      }
+      .box {
+        margin: 0 auto;
+        /*1200+     ~611
+        992+      ~600
+        768+      720
+        544+      460*/
+      }
+      @media (min-width:544px) {
+        .box {
+          width:460px;
+        }
+      }
+      @media (min-width:768px) {
+        .box {
+          width:720px;
+        }
+      }
+      @media (min-width:992px) {
+        .box {
+          width:600px;
+        }
+      }
+      @media (min-width:1200px) {
+        .box {
+          width:611px;
+        }
       }
       body {
         font-family: sans-serif;
+        font-size: 11px;
+      }
+      p {
+        font-size: 20px;
+        font-family: Georgia;
+        margin-top: 20px;
       }
       .tampa-bay {
-        background-color: rgba(255,255,0,0.1);
+        background-color: rgba(255,255,0,0.3);
+      }
+      .card {
+        margin-bottom: 20px;
+        width: 300px;
+        display: inline-block;
+        float: left;
+        margin-right: 5px;
+      }
+      .entryText {
+        display: inline-block;
+        width: 50%;
+        float: left;
       }
       .bar {
-        background-color: blue;
+        display: inline-block;
+        padding: 0;
+        background-color: black;
+        height: 5px;
+      }
+      @media (max-width:991px) {
+        .screenCheck {
+          width: 0;
+        }
+        .entryText {
+          display: block;
+          width: 100%;
+        }
       }
     </style>
 
